@@ -26,8 +26,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isLoading = true;
   bool _isSaving = false;
   bool _isEditing = false;
+  bool _showSessions = true;
   
   List<dynamic> _userSessions = [];
+  List<dynamic> _userPosts = [];
   final ScreenshotController _screenshotController = ScreenshotController();
 
   final levels = ['Beginner', 'Intermediate', 'Advanced', 'Elite'];
@@ -65,6 +67,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
           
       _userSessions = sessions;
 
+      final posts = await SupabaseConfig.client
+          .from('posts')
+          .select('*, profiles(username, full_name, avatar_url, calisthenics_level), sessions(*), likes(user_id), comments(*)')
+          .eq('user_id', user.id)
+          .isFilter('session_id', null)
+          .order('created_at', ascending: false);
+          
+      _userPosts = posts;
+
     } catch (e) {
       debugPrint(e.toString());
     } finally {
@@ -98,6 +109,55 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _signOut() async {
     await SupabaseConfig.client.auth.signOut();
     if (mounted) context.go('/login');
+  }
+
+  Future<void> _deletePost(String postId) async {
+    try {
+      await SupabaseConfig.client.from('posts').delete().match({'id': postId});
+      _fetchProfileAndSessions();
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Post deleted')));
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+    }
+  }
+
+  Future<void> _editPostCaption(String postId, String newCaption) async {
+    try {
+      await SupabaseConfig.client.from('posts').update({'caption': newCaption}).match({'id': postId});
+      _fetchProfileAndSessions();
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Post updated')));
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+    }
+  }
+
+  void _showEditPostDialog(String postId, String currentCaption) {
+    final controller = TextEditingController(text: currentCaption);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).cardColor,
+        title: const Text('Edit Caption'),
+        content: TextField(
+          controller: controller,
+          maxLines: 3,
+          decoration: const InputDecoration(
+            hintText: 'Enter new caption...',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _editPostCaption(postId, controller.text.trim());
+            },
+            child: const Text('Save', style: TextStyle(color: AppTheme.accentColor)),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _downloadAndShareSession(Map<String, dynamic> session) async {
@@ -199,9 +259,53 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
                       const SizedBox(height: 32),
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text('My Sessions', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => setState(() => _showSessions = true),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    bottom: BorderSide(
+                                      color: _showSessions ? AppTheme.accentColor : Colors.transparent,
+                                      width: 2,
+                                    ),
+                                  ),
+                                ),
+                                child: Center(
+                                  child: Text('Sessions', style: TextStyle(
+                                    fontWeight: _showSessions ? FontWeight.bold : FontWeight.normal,
+                                    color: _showSessions ? AppTheme.accentColor : Colors.grey,
+                                  )),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => setState(() => _showSessions = false),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    bottom: BorderSide(
+                                      color: !_showSessions ? AppTheme.accentColor : Colors.transparent,
+                                      width: 2,
+                                    ),
+                                  ),
+                                ),
+                                child: Center(
+                                  child: Text('Posts', style: TextStyle(
+                                    fontWeight: !_showSessions ? FontWeight.bold : FontWeight.normal,
+                                    color: !_showSessions ? AppTheme.accentColor : Colors.grey,
+                                  )),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 16),
                     ],
@@ -209,7 +313,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               
-              if (_userSessions.isEmpty)
+              if (_showSessions && _userSessions.isEmpty)
                 const SliverToBoxAdapter(
                   child: Center(
                     child: Padding(
@@ -218,11 +322,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                 )
+              else if (!_showSessions && _userPosts.isEmpty)
+                const SliverToBoxAdapter(
+                  child: Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(32.0),
+                      child: Text('No posts yet.', style: TextStyle(fontSize: 16, color: Colors.grey)),
+                    ),
+                  ),
+                )
               else
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
-                    (context, index) => _buildSessionCard(_userSessions[index]),
-                    childCount: _userSessions.length,
+                    (context, index) => _showSessions 
+                        ? _buildSessionCard(_userSessions[index])
+                        : _buildPostCard(_userPosts[index]),
+                    childCount: _showSessions ? _userSessions.length : _userPosts.length,
                   ),
                 ),
                 
@@ -395,6 +510,125 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                           ),
                         ),
+                    ],
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPostCard(Map<String, dynamic> post) {
+    final profile = post['profiles'] ?? {};
+    final displayName = profile['full_name'] ?? profile['username'] ?? 'Athlete';
+    final avatarUrl = profile['avatar_url'];
+    final session = post['sessions'];
+    final caption = post['caption'];
+    final mediaUrl = post['media_url'];
+
+    final likes = List.from(post['likes'] ?? []);
+    final comments = List.from(post['comments'] ?? []);
+    final currentUserId = SupabaseConfig.client.auth.currentUser?.id;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+      child: GlassCard(
+        padding: EdgeInsets.zero,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl) : null,
+                  child: avatarUrl == null ? Text(displayName[0].toUpperCase()) : null,
+                ),
+                title: Text(displayName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                subtitle: Text(post['created_at'].toString().substring(0, 10)),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (session != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: AppTheme.accentColor.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppTheme.accentColor),
+                        ),
+                        child: const Text('TRAINED', style: TextStyle(color: AppTheme.accentColor, fontWeight: FontWeight.bold, fontSize: 12)),
+                      ),
+                    if (post['user_id'] == currentUserId)
+                      PopupMenuButton<String>(
+                        icon: const Icon(Icons.more_vert),
+                        onSelected: (value) {
+                          if (value == 'edit') {
+                            _showEditPostDialog(post['id'], caption ?? '');
+                          } else if (value == 'delete') {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                backgroundColor: Theme.of(context).cardColor,
+                                title: const Text('Delete Post'),
+                                content: const Text('Are you sure you want to delete this post?'),
+                                actions: [
+                                  TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                      _deletePost(post['id']);
+                                    },
+                                    child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(value: 'edit', child: Row(children: [Icon(Icons.edit, size: 20), SizedBox(width: 8), Text('Edit')])),
+                          const PopupMenuItem(value: 'delete', child: Row(children: [Icon(Icons.delete, size: 20, color: Colors.red), SizedBox(width: 8), Text('Delete', style: TextStyle(color: Colors.red))])),
+                        ],
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            
+            if (caption != null && caption.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Text(caption, style: const TextStyle(fontSize: 16)),
+              ),
+
+            if (mediaUrl != null)
+              Image.network(mediaUrl, height: 250, fit: BoxFit.cover),
+            
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (session != null) ...[
+                    Text('Workout Time: ${_formatDuration(session['duration_seconds'])}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    if (session['skills_worked'] != null && session['skills_worked'].isNotEmpty)
+                      Text('Skills: ${session['skills_worked']}'),
+                    const Divider(height: 24),
+                  ],
+                  Row(
+                    children: [
+                      const Icon(Icons.favorite_border, size: 20, color: Colors.grey),
+                      const SizedBox(width: 4),
+                      Text('${likes.length}'),
+                      const SizedBox(width: 16),
+                      const Icon(Icons.chat_bubble_outline, size: 20, color: Colors.grey),
+                      const SizedBox(width: 4),
+                      Text('${comments.length}'),
                     ],
                   ),
                 ],

@@ -105,7 +105,7 @@ class _SessionScreenState extends State<SessionScreen> with SingleTickerProvider
       final now = DateTime.now();
       final startTime = now.subtract(Duration(seconds: secondsElapsed));
 
-      await SupabaseConfig.client.from('sessions').insert({
+      final sessionRes = await SupabaseConfig.client.from('sessions').insert({
         'user_id': user.id,
         'start_time': startTime.toIso8601String(),
         'end_time': now.toIso8601String(),
@@ -113,7 +113,19 @@ class _SessionScreenState extends State<SessionScreen> with SingleTickerProvider
         'skills_worked': _skillsController.text.trim(),
         'photo_url': photoUrl,
         'is_private': _isPrivate,
-      });
+      }).select().single();
+
+      if (!_isPrivate) {
+        await SupabaseConfig.client.from('posts').insert({
+          'user_id': user.id,
+          'caption': _skillsController.text.trim().isNotEmpty 
+              ? 'Trained: ${_skillsController.text.trim()}' 
+              : 'Completed a new workout session!',
+          'media_url': photoUrl,
+          'media_type': photoUrl != null ? 'image' : null,
+          'session_id': sessionRes['id'],
+        });
+      }
 
       if (mounted) {
         Navigator.pop(context); // Close modal

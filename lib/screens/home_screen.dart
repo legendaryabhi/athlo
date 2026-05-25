@@ -155,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: const TextStyle(fontSize: 28),
                   children: [
                     TextSpan(text: displayName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    const TextSpan(text: '! here\'s your health snapshot for today!'),
+                    const TextSpan(text: '!'),
                   ],
                 ),
               ),

@@ -17,13 +17,26 @@ class SessionExportOverlay extends StatelessWidget {
   });
 
   String _formatDate(DateTime date) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     final month = months[date.month - 1];
     final hour = date.hour;
     final minute = date.minute.toString().padLeft(2, '0');
     final ampm = hour >= 12 ? 'PM' : 'AM';
     final hour12 = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
-    
+
     return '$month ${date.day}, ${date.year} at $hour12:$minute $ampm';
   }
 
@@ -36,12 +49,8 @@ class SessionExportOverlay extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-
           // Background Image
-          Image.network(
-            photoUrl,
-            fit: BoxFit.cover,
-          ),
+          Image.network(photoUrl, fit: BoxFit.cover),
 
           // Dark Gradient Overlay
           Positioned.fill(
@@ -80,29 +89,29 @@ class SessionExportOverlay extends StatelessWidget {
                     children: [
                       // ATHLO
                       Container(
-  padding: const EdgeInsets.symmetric(
-    horizontal: 22,
-    vertical: 8,
-  ),
-  decoration: BoxDecoration(
-    color: const Color(0xFF1C2826), // darkBgTop
-    borderRadius: BorderRadius.circular(10),
-    border: Border.all( 
-      color: Colors.white.withOpacity(0.08),
-      width: 1,
-    ),
-  ),
-  child: const Text(
-    'ATHLO',
-    textAlign: TextAlign.center,
-    style: TextStyle(
-      color: Color(0xFFFFFFFF), // darkText
-      fontSize: 16,
-      fontWeight: FontWeight.w900,
-      letterSpacing: 2,
-    ),
-  ),
-),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 22,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1C2826), // darkBgTop
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.08),
+                            width: 1,
+                          ),
+                        ),
+                        child: const Text(
+                          'ATHLO',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Color(0xFFFFFFFF), // darkText
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 2,
+                          ),
+                        ),
+                      ),
 
                       const SizedBox(height: 32),
 
@@ -135,8 +144,7 @@ class SessionExportOverlay extends StatelessWidget {
                       const SizedBox(height: 4),
 
                       Text(
-                        skillsWorked != null &&
-                                skillsWorked!.trim().isNotEmpty
+                        skillsWorked != null && skillsWorked!.trim().isNotEmpty
                             ? skillsWorked!
                             : 'Workout Session',
                         textAlign: TextAlign.center,

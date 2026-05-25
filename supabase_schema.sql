@@ -122,4 +122,57 @@ ON public.comments FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "Users can delete their own comments." 
 ON public.comments FOR DELETE USING (auth.uid() = user_id);
 
--- till here executed in supabase
+-- 7. Posts Table (Community Posts and Session Shares)
+CREATE TABLE IF NOT EXISTS public.posts (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references public.profiles(id) on delete cascade not null,
+  caption text,
+  media_url text,
+  media_type text, -- 'image' or 'video'
+  session_id uuid references public.sessions(id) on delete cascade,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+ALTER TABLE public.posts ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Posts are viewable by everyone." 
+ON public.posts FOR SELECT USING (true);
+
+CREATE POLICY "Users can insert their own posts." 
+ON public.posts FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own posts." 
+ON public.posts FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own posts." 
+ON public.posts FOR DELETE USING (auth.uid() = user_id);
+
+-- Update likes to support posts
+ALTER TABLE public.likes ADD COLUMN IF NOT EXISTS post_id uuid references public.posts(id) on delete cascade;
+ALTER TABLE public.likes ALTER COLUMN session_id DROP NOT NULL;
+
+-- Update comments to support posts
+ALTER TABLE public.comments ADD COLUMN IF NOT EXISTS post_id uuid references public.posts(id) on delete cascade;
+ALTER TABLE public.comments ALTER COLUMN session_id DROP NOT NULL;
+
+-- Migration: Create posts for existing public sessions
+DO $$
+DECLARE
+    sess RECORD;
+    new_post_id UUID;
+BEGIN
+    FOR sess IN SELECT * FROM public.sessions WHERE is_private = false LOOP
+        -- Only migrate if a post doesn't already exist for this session
+        IF NOT EXISTS (SELECT 1 FROM public.posts WHERE session_id = sess.id) THEN
+            INSERT INTO public.posts (user_id, caption, session_id, media_url, created_at)
+            VALUES (sess.user_id, 'Shared a workout session!', sess.id, sess.photo_url, sess.created_at)
+            RETURNING id INTO new_post_id;
+            
+            -- Migrate likes and comments to point to the new post
+            UPDATE public.likes SET post_id = new_post_id WHERE session_id = sess.id AND post_id IS NULL;
+            UPDATE public.comments SET post_id = new_post_id WHERE session_id = sess.id AND post_id IS NULL;
+        END IF;
+    END LOOP;
+END $$;
+
+-- till here executed in supabase add new execution code after here not in between
