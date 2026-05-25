@@ -216,7 +216,9 @@ class _FeedScreenState extends State<FeedScreen> {
       builder: (context) {
         return Padding(
           padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+            bottom: MediaQuery.of(context).viewInsets.bottom > 0 
+                ? MediaQuery.of(context).viewInsets.bottom + 24 
+                : 110, // 110px clears the bottom navigation
             left: 16, right: 16, top: 16
           ),
           child: Column(

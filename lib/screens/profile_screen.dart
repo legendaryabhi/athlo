@@ -109,15 +109,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Generating image...')));
       
-      final m = (session['duration_seconds'] as int) ~/ 60;
-      final durationStr = '$m min';
+      final durationStr = _formatDuration(session['duration_seconds'] as int);
 
       final Uint8List capturedImage = await _screenshotController.captureFromWidget(
         SessionExportOverlay(
           photoUrl: session['photo_url'],
-          displayName: _fullNameController.text.isNotEmpty ? _fullNameController.text : _usernameController.text,
+          calisthenicsLevel: _calisthenicsLevel,
           durationFormatted: durationStr,
           skillsWorked: session['skills_worked'],
+          sessionDate: DateTime.parse(session['created_at'].toString()),
         ),
         delay: const Duration(seconds: 1), // allow image to load
       );
@@ -132,8 +132,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
   
   String _formatDuration(int seconds) {
-    final m = seconds ~/ 60;
-    return '$m min';
+    final h = seconds ~/ 3600;
+    final m = (seconds % 3600) ~/ 60;
+    if (h > 0) return '${h}h ${m}m';
+    return '${m}m';
   }
 
   @override

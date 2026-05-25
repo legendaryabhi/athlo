@@ -1,31 +1,49 @@
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
 
 class SessionExportOverlay extends StatelessWidget {
   final String photoUrl;
-  final String displayName;
+  final String calisthenicsLevel;
   final String durationFormatted;
   final String? skillsWorked;
+  final DateTime sessionDate;
 
   const SessionExportOverlay({
     super.key,
     required this.photoUrl,
-    required this.displayName,
+    required this.calisthenicsLevel,
     required this.durationFormatted,
     this.skillsWorked,
+    required this.sessionDate,
   });
+
+  String _formatDate(DateTime date) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final month = months[date.month - 1];
+    final hour = date.hour;
+    final minute = date.minute.toString().padLeft(2, '0');
+    final ampm = hour >= 12 ? 'PM' : 'AM';
+    final hour12 = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+    
+    return '$month ${date.day}, ${date.year} at $hour12:$minute $ampm';
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: 1080,
+      height: 1920,
       color: Colors.black,
       child: Stack(
+        fit: StackFit.expand,
         children: [
+
           // Background Image
-          Image.network(photoUrl, width: 1080, fit: BoxFit.fitWidth),
-          
-          // Gradient Overlay to ensure text readability
+          Image.network(
+            photoUrl,
+            fit: BoxFit.cover,
+          ),
+
+          // Dark Gradient Overlay
           Positioned.fill(
             child: Container(
               decoration: const BoxDecoration(
@@ -33,105 +51,117 @@ class SessionExportOverlay extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.transparent,
-                    Colors.black26,
-                    Colors.black87,
+                    Color.fromARGB(40, 0, 0, 0),
+                    Color.fromARGB(120, 0, 0, 0),
+                    Color.fromARGB(220, 0, 0, 0),
                   ],
-                  stops: [0.4, 0.7, 1.0],
+                  stops: [0.2, 0.6, 1.0],
                 ),
               ),
             ),
           ),
 
-          // Content Overlay
+          // Main Content
           Positioned.fill(
             child: Padding(
-              padding: const EdgeInsets.all(48.0),
+              padding: const EdgeInsets.only(
+                top: 100,
+                bottom: 80,
+                left: 40,
+                right: 40,
+              ),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Top Right Branding (Athlo)
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.fitness_center, color: AppTheme.accentColor, size: 40),
-                        const SizedBox(width: 12),
-                        const Text(
-                          'ATHLO',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 40,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 2,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  
-                  const Spacer(),
-
-                  // User Info
-                  Text(
-                    displayName.toUpperCase(),
-                    style: const TextStyle(
-                      color: AppTheme.accentColor,
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Workout Time
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
+                  // Top Section
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
-                        durationFormatted.split(' ')[0], // Extracts the number (e.g. '45' from '45 min')
-                        style: const TextStyle(
+                      // ATHLO
+                      const Text(
+                        'ATHLO',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
                           color: Colors.white,
-                          fontSize: 120,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          height: 1,
+                          letterSpacing: 3,
                         ),
                       ),
-                      const SizedBox(width: 16),
-                      const Text(
-                        'MIN',
+
+                      const SizedBox(height: 32),
+
+                      // Level
+                      Text(
+                        'Calisthenics $calisthenicsLevel',
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Skill Name
+                      Text(
+                        skillsWorked != null &&
+                                skillsWorked!.trim().isNotEmpty
+                            ? skillsWorked!
+                            : 'Workout Session',
+                        textAlign: TextAlign.center,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          height: 1.0,
+                        ),
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Time Label
+                      Text(
+                        'Time',
+                        textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 40,
+                          color: Colors.white.withOpacity(0.7),
+                          fontSize: 20,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+
+                      const SizedBox(height: 4),
+
+                      // Time Value
+                      Text(
+                        durationFormatted,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
                   ),
-                  
-                  // Skills / Message
-                  if (skillsWorked != null && skillsWorked!.isNotEmpty) ...[
-                    const SizedBox(height: 24),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.black45,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.white24),
-                      ),
-                      child: Text(
-                        skillsWorked!,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 32,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
+
+                  // Bottom Section (Date)
+                  Text(
+                    _formatDate(sessionDate),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
                     ),
-                  ]
+                  ),
                 ],
               ),
             ),
