@@ -1,0 +1,215 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  padding-top: var(--spacing-lg);
+}
+
+.header {
+  margin-bottom: var(--spacing-sm);
+}
+
+.welcomeText {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.dateText {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-top: 8px;
+}
+
+.glassCard {
+  background: var(--bg-elevated);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: 0 8px 32px rgba(0, 33, 23, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Specific styling for the big streak dial card */
+.dialCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 280px;
+}
+
+.dialContainer {
+  position: relative;
+  width: 200px;
+  height: 120px;
+  overflow: hidden; /* For half-circle */
+  margin-bottom: var(--spacing-md);
+}
+
+.dialSvg {
+  width: 100%;
+  height: 200%;
+  transform: rotate(-180deg);
+}
+
+.dialPathBg {
+  fill: none;
+  stroke: rgba(0, 33, 23, 0.1);
+  stroke-width: 12;
+  stroke-linecap: round;
+}
+
+.dialPathFg {
+  fill: none;
+  stroke: var(--accent-primary);
+  stroke-width: 12;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s ease-out;
+}
+
+.streakValue {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 4rem;
+  font-weight: 800;
+  color: var(--accent-primary);
+  line-height: 1;
+}
+
+.streakLabel {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.streakSublabel {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* Stats Grid */
+.statsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.sectionTitle {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+}
+
+.statCard {
+  background: var(--bg-elevated);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 15px rgba(0, 33, 23, 0.03);
+}
+
+.statCardLabel {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.statCardValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.statCardSub {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+/* Milestones */
+.milestoneList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.milestoneCard {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.milestoneIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: rgba(0, 33, 23, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-secondary);
+}
+
+.milestoneInfo {
+  flex: 1;
+}
+
+.milestoneTitle {
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.milestoneDesc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* Floating Action Button */
+.fabButton {
+  position: fixed;
+  bottom: calc(var(--nav-height, 60px) + 20px);
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(0, 33, 23, 0.2);
+  z-index: 100;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.fabButton:hover {
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 33, 23, 0.3);
+}
+
+.fabButton:active {
+  transform: scale(0.95);
+}
