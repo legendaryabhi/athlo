@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import '../supabase_client.dart';
 import 'package:provider/provider.dart';
 import '../theme/theme_provider.dart';
@@ -174,7 +173,7 @@ class _SessionScreenState extends State<SessionScreen> with SingleTickerProvider
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(LucideIcons.uploadCloud),
+                          const Icon(Icons.cloud_upload_outlined),
                           const SizedBox(width: 8),
                           Text(_photo != null ? 'Photo Selected' : 'Upload photo'),
                         ],
@@ -233,7 +232,7 @@ class _SessionScreenState extends State<SessionScreen> with SingleTickerProvider
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        leading: IconButton(icon: const Icon(LucideIcons.x), onPressed: () => context.pop()),
+        leading: IconButton(icon: const Icon(Icons.close), onPressed: () => context.pop()),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),

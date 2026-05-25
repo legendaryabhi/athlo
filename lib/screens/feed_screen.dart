@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -177,19 +176,19 @@ class _FeedScreenState extends State<FeedScreen> {
                           Row(
                             children: [
                               IconButton(
-                                icon: Icon(hasLiked ? LucideIcons.heart : LucideIcons.heart, color: hasLiked ? Colors.red : Colors.grey),
+                                icon: Icon(hasLiked ? Icons.favorite : Icons.favorite_border, color: hasLiked ? Colors.red : Colors.grey),
                                 onPressed: () => _toggleLike(session['id'], hasLiked),
                               ),
                               Text('${likes.length}'),
                               const SizedBox(width: 16),
                               IconButton(
-                                icon: const Icon(LucideIcons.messageCircle),
+                                icon: const Icon(Icons.chat_bubble_outline),
                                 onPressed: () => _showCommentsModal(session['id'], comments),
                               ),
                               Text('${comments.length}'),
                               const Spacer(),
                               IconButton(
-                                icon: const Icon(LucideIcons.share2),
+                                icon: const Icon(Icons.share_outlined),
                                 onPressed: () {
                                   Share.share('Check out this ${_formatDuration(session['duration_seconds'])} workout by $displayName on Athlo!');
                                 },
@@ -243,7 +242,7 @@ class _FeedScreenState extends State<FeedScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(LucideIcons.send),
+                    icon: const Icon(Icons.send_outlined),
                     onPressed: () {
                       _addComment(sessionId, controller.text);
                       Navigator.pop(context);

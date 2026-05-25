@@ -1,10 +1,5 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
-import 'package:provider/provider.dart';
-import '../theme/theme_provider.dart';
-import '../theme/app_theme.dart';
 
 class BottomNavLayout extends StatelessWidget {
   final Widget child;
@@ -13,37 +8,33 @@ class BottomNavLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Provider.of<ThemeProvider>(context).isDarkMode;
-
     return Scaffold(
       extendBody: true, // Important for floating nav bar to sit over background
       body: child,
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(40),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: Container(
-                height: 70,
-                decoration: BoxDecoration(
-                  color: isDark ? AppTheme.darkGlassBg : AppTheme.lightGlassBg,
-                  borderRadius: BorderRadius.circular(40),
-                  border: Border.all(
-                    color: isDark ? AppTheme.darkGlassBorder : AppTheme.lightGlassBorder,
-                    width: 1.5,
-                  ),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0F2C2A), // Premium dark teal matching the design
+              borderRadius: BorderRadius.circular(50),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildNavItem(context, LucideIcons.home, 'Home', 0, '/home', isDark),
-                    _buildNavItem(context, LucideIcons.clipboardList, 'Feed', 1, '/feed', isDark),
-                    _buildNavItem(context, LucideIcons.user, 'Profile', 2, '/profile', isDark),
-                  ],
-                ),
-              ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildNavItem(context, Icons.home, Icons.home_outlined, 'Home', 0, '/home'),
+                _buildNavItem(context, Icons.feed, Icons.feed_outlined, 'Feed', 1, '/feed'),
+                _buildNavItem(context, Icons.bar_chart, Icons.bar_chart_outlined, 'Stats', 2, ''), // Placeholder
+                _buildNavItem(context, Icons.person, Icons.person_outline, 'Profile', 3, '/profile'),
+              ],
             ),
           ),
         ),
@@ -51,37 +42,44 @@ class BottomNavLayout extends StatelessWidget {
     );
   }
 
-  Widget _buildNavItem(BuildContext context, IconData icon, String label, int index, String route, bool isDark) {
+  Widget _buildNavItem(BuildContext context, IconData activeIcon, IconData inactiveIcon, String label, int index, String route) {
     final selectedIndex = _calculateSelectedIndex(context);
     final isSelected = selectedIndex == index;
 
     return GestureDetector(
-      onTap: () => context.go(route),
+      onTap: () {
+        if (route.isNotEmpty) context.go(route);
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOutCubic,
-        padding: EdgeInsets.symmetric(horizontal: isSelected ? 20 : 12, vertical: 12),
+        padding: EdgeInsets.symmetric(
+          horizontal: isSelected ? 24 : 14, 
+          vertical: 14
+        ),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.accentColor : Colors.transparent,
-          borderRadius: BorderRadius.circular(30),
+          color: Colors.white,
+          // When symmetric padding is equal, large border radius makes it a perfect circle.
+          // When horizontal padding is larger, it becomes a pill shape.
+          borderRadius: BorderRadius.circular(50), 
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              icon,
-              color: isSelected 
-                  ? Colors.white 
-                  : (isDark ? Colors.white70 : Colors.black87),
-              size: 24,
+              isSelected ? activeIcon : inactiveIcon,
+              color: Colors.black,
+              size: 26,
             ),
             if (isSelected) ...[
               const SizedBox(width: 8),
               Text(
                 label,
                 style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                  letterSpacing: 0.5,
                 ),
               ),
             ]
@@ -95,7 +93,7 @@ class BottomNavLayout extends StatelessWidget {
     final String location = GoRouterState.of(context).matchedLocation;
     if (location.startsWith('/home')) return 0;
     if (location.startsWith('/feed')) return 1;
-    if (location.startsWith('/profile')) return 2;
+    if (location.startsWith('/profile')) return 3; // Mapped to index 3 based on UI layout
     return 0;
   }
 }

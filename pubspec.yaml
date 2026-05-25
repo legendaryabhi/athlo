@@ -41,9 +41,9 @@ dependencies:
   share_plus: ^12.0.2
   screenshot: ^3.0.0
   path_provider: ^2.1.5
-  lucide_icons: ^0.257.0
   google_fonts: ^6.3.2
   shared_preferences: ^2.5.3
+  flutter_lucide: ^1.11.0
 
 dev_dependencies:
   flutter_test:

@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
@@ -159,7 +158,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         elevation: 0,
         actions: [
           IconButton(
-            icon: Icon(_isEditing ? LucideIcons.x : LucideIcons.edit2),
+            icon: Icon(_isEditing ? Icons.close : Icons.edit_outlined),
             onPressed: () {
               setState(() {
                 if (_isEditing) {
@@ -172,7 +171,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               });
             },
           ),
-          IconButton(icon: const Icon(LucideIcons.logOut), onPressed: _signOut),
+          if (!_isEditing)
+            IconButton(icon: const Icon(Icons.logout_outlined), onPressed: _signOut),
         ],
       ),
       body: Container(
@@ -354,7 +354,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(session['created_at'].toString().substring(0, 10), style: const TextStyle(fontWeight: FontWeight.bold)),
-                  if (isPrivate) const Icon(LucideIcons.lock, size: 16, color: Colors.grey)
+                  if (isPrivate) const Icon(Icons.lock_outline, size: 16, color: Colors.grey)
                 ],
               ),
             ),
@@ -375,18 +375,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   
                   Row(
                     children: [
-                      const Icon(LucideIcons.heart, size: 20, color: Colors.grey),
+                      const Icon(Icons.favorite_border, size: 20, color: Colors.grey),
                       const SizedBox(width: 4),
                       Text('${likes.length}'),
                       const SizedBox(width: 16),
-                      const Icon(LucideIcons.messageCircle, size: 20, color: Colors.grey),
+                      const Icon(Icons.chat_bubble_outline, size: 20, color: Colors.grey),
                       const SizedBox(width: 4),
                       Text('${comments.length}'),
                       const Spacer(),
                       if (photoUrl != null)
                         ElevatedButton.icon(
                           onPressed: () => _downloadAndShareSession(session),
-                          icon: const Icon(LucideIcons.download, size: 16, color: Colors.white),
+                          icon: const Icon(Icons.download_outlined, size: 16, color: Colors.white),
                           label: const Text('Export', style: TextStyle(color: Colors.white)),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppTheme.accentColor,

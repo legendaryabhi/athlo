@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import '../supabase_client.dart';
 import '../theme/theme_provider.dart';
@@ -61,13 +60,13 @@ class _HomeScreenState extends State<HomeScreen> {
       todayDurationMinutes = todaySecs ~/ 60;
 
       milestones = [];
-      if (totalSessions >= 1) milestones.add({'title': "First Step", 'desc': "Completed your first workout", 'icon': LucideIcons.target, 'active': true});
-      if (totalSessions >= 5) milestones.add({'title': "Consistent", 'desc': "Completed 5 workouts", 'icon': LucideIcons.activity, 'active': true});
-      if (totalSessions >= 10) milestones.add({'title': "Dedicated", 'desc': "Completed 10 workouts", 'icon': LucideIcons.flame, 'active': true});
-      if (totalSecs >= 3600) milestones.add({'title': "Hour of Power", 'desc': "Trained for over 1 hour total", 'icon': LucideIcons.clock, 'active': true});
+      if (totalSessions >= 1) milestones.add({'title': "First Step", 'desc': "Completed your first workout", 'icon': Icons.track_changes, 'active': true});
+      if (totalSessions >= 5) milestones.add({'title': "Consistent", 'desc': "Completed 5 workouts", 'icon': Icons.show_chart, 'active': true});
+      if (totalSessions >= 10) milestones.add({'title': "Dedicated", 'desc': "Completed 10 workouts", 'icon': Icons.local_fire_department_outlined, 'active': true});
+      if (totalSecs >= 3600) milestones.add({'title': "Hour of Power", 'desc': "Trained for over 1 hour total", 'icon': Icons.access_time, 'active': true});
       
       if (totalSessions < 10 && totalSessions >= 1) {
-        milestones.add({'title': "Dedicated", 'desc': "Complete 10 workouts", 'icon': LucideIcons.target, 'active': false});
+        milestones.add({'title': "Dedicated", 'desc': "Complete 10 workouts", 'icon': Icons.track_changes, 'active': false});
       }
 
       setState(() => isLoading = false);
@@ -130,19 +129,19 @@ class _HomeScreenState extends State<HomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Icon(LucideIcons.activity, size: 32),
+                  const Icon(Icons.show_chart, size: 32),
                   Row(
                     children: [
                       GlassCard(
                         padding: const EdgeInsets.all(8),
                         borderRadius: 12,
-                        child: Icon(LucideIcons.barChart2, size: 20),
+                        child: Icon(Icons.bar_chart, size: 20),
                       ),
                       const SizedBox(width: 12),
                       GlassCard(
                         padding: const EdgeInsets.all(8),
                         borderRadius: 12,
-                        child: Icon(LucideIcons.bell, size: 20),
+                        child: Icon(Icons.notifications_none, size: 20),
                       ),
                     ],
                   )
@@ -177,9 +176,9 @@ class _HomeScreenState extends State<HomeScreen> {
               
               Row(
                 children: [
-                  Expanded(child: _buildStatCard('Active Time', '$todayDurationMinutes min', LucideIcons.clock)),
+                  Expanded(child: _buildStatCard('Active Time', '$todayDurationMinutes min', Icons.access_time)),
                   const SizedBox(width: 16),
-                  Expanded(child: _buildStatCard('Streak', '$currentStreak days', LucideIcons.flame)),
+                  Expanded(child: _buildStatCard('Streak', '$currentStreak days', Icons.local_fire_department_outlined)),
                 ],
               ),
               
@@ -197,7 +196,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: FloatingActionButton(
           onPressed: () => context.push('/session'),
           backgroundColor: AppTheme.accentColor,
-          child: const Icon(LucideIcons.plus, color: Colors.white),
+          child: const Icon(Icons.add, color: Colors.white),
         ),
       ),
     );
@@ -262,7 +261,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             title: Text(m['title'], style: const TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Text(m['desc']),
-            trailing: m['active'] ? const Icon(LucideIcons.medal, color: AppTheme.accentColor) : null,
+            trailing: m['active'] ? const Icon(Icons.emoji_events_outlined, color: AppTheme.accentColor) : null,
           ),
         ),
       ),
