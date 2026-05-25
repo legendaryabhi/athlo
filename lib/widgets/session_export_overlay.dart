@@ -79,16 +79,30 @@ class SessionExportOverlay extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       // ATHLO
-                      const Text(
-                        'ATHLO',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 3,
-                        ),
-                      ),
+                      Container(
+  padding: const EdgeInsets.symmetric(
+    horizontal: 22,
+    vertical: 8,
+  ),
+  decoration: BoxDecoration(
+    color: const Color(0xFF1C2826), // darkBgTop
+    borderRadius: BorderRadius.circular(10),
+    border: Border.all( 
+      color: Colors.white.withOpacity(0.08),
+      width: 1,
+    ),
+  ),
+  child: const Text(
+    'ATHLO',
+    textAlign: TextAlign.center,
+    style: TextStyle(
+      color: Color(0xFFFFFFFF), // darkText
+      fontSize: 16,
+      fontWeight: FontWeight.w900,
+      letterSpacing: 2,
+    ),
+  ),
+),
 
                       const SizedBox(height: 32),
 
@@ -108,6 +122,18 @@ class SessionExportOverlay extends StatelessWidget {
                       const SizedBox(height: 24),
 
                       // Skill Name
+                      Text(
+                        'Skill',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.7),
+                          fontSize: 20,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+
+                      const SizedBox(height: 4),
+
                       Text(
                         skillsWorked != null &&
                                 skillsWorked!.trim().isNotEmpty
