@@ -13,19 +13,24 @@ class BottomNavLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Provider.of<ThemeProvider>(context).isDarkMode;
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Responsive outer padding to handle narrow screens gracefully
+    final double horizontalPadding = screenWidth < 360 ? 12.0 : 24.0;
+    final double verticalPadding = screenWidth < 360 ? 8.0 : 16.0;
 
     return Scaffold(
       extendBody: true, // Important for floating nav bar to sit over background
       body: child,
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+          padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: verticalPadding),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(50),
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: Container(
-                padding: const EdgeInsets.all(8),
+                padding: EdgeInsets.all(screenWidth < 360 ? 6.0 : 8.0),
                 decoration: BoxDecoration(
                   color: isDark ? AppTheme.darkGlassBg : AppTheme.lightGlassBg,
                   borderRadius: BorderRadius.circular(50),
@@ -44,9 +49,9 @@ class BottomNavLayout extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildNavItem(context, Icons.home, Icons.home_outlined, 'Home', 0, '/home', isDark),
-                    _buildNavItem(context, Icons.feed, Icons.feed_outlined, 'Feed', 1, '/feed', isDark),
-                    _buildNavItem(context, Icons.person, Icons.person_outline, 'Profile', 2, '/profile', isDark),
+                    _buildNavItem(context, Icons.home, Icons.home_outlined, 'Home', 0, '/home', isDark, screenWidth),
+                    _buildNavItem(context, Icons.feed, Icons.feed_outlined, 'Feed', 1, '/feed', isDark, screenWidth),
+                    _buildNavItem(context, Icons.person, Icons.person_outline, 'Profile', 2, '/profile', isDark, screenWidth),
                   ],
                 ),
               ),
@@ -57,9 +62,20 @@ class BottomNavLayout extends StatelessWidget {
     );
   }
 
-  Widget _buildNavItem(BuildContext context, IconData activeIcon, IconData inactiveIcon, String label, int index, String route, bool isDark) {
+  Widget _buildNavItem(BuildContext context, IconData activeIcon, IconData inactiveIcon, String label, int index, String route, bool isDark, double screenWidth) {
     final selectedIndex = _calculateSelectedIndex(context);
     final isSelected = selectedIndex == index;
+
+    // Responsive padding and sizes
+    final isSmallScreen = screenWidth < 360;
+    final double horizontalItemPadding = isSelected 
+        ? (isSmallScreen ? 14.0 : 24.0) 
+        : (isSmallScreen ? 10.0 : 14.0);
+    final double verticalItemPadding = isSmallScreen ? 10.0 : 14.0;
+    final double iconSize = isSmallScreen ? 20.0 : 26.0;
+    
+    // Hide text on extremely small screens (e.g. width < 320) to prevent overflow
+    final showText = isSelected && screenWidth >= 320;
 
     return GestureDetector(
       onTap: () {
@@ -69,8 +85,8 @@ class BottomNavLayout extends StatelessWidget {
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOutCubic,
         padding: EdgeInsets.symmetric(
-          horizontal: isSelected ? 24 : 14, 
-          vertical: 14
+          horizontal: horizontalItemPadding, 
+          vertical: verticalItemPadding
         ),
         decoration: BoxDecoration(
           color: isSelected ? AppTheme.accentColor : Colors.transparent,
@@ -82,17 +98,20 @@ class BottomNavLayout extends StatelessWidget {
             Icon(
               isSelected ? activeIcon : inactiveIcon,
               color: isSelected ? Colors.white : (isDark ? Colors.white70 : Colors.black87),
-              size: 26,
+              size: iconSize,
             ),
-            if (isSelected) ...[
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 16,
-                  letterSpacing: 0.5,
+            if (showText) ...[
+              SizedBox(width: isSmallScreen ? 6 : 8),
+              Flexible(
+                child: Text(
+                  label,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: isSmallScreen ? 13 : 16,
+                    letterSpacing: 0.5,
+                  ),
                 ),
               ),
             ]

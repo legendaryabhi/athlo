@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
@@ -75,11 +76,15 @@ class _FeedScreenState extends State<FeedScreen> {
     }
   }
 
-  Future<void> _deletePost(String postId) async {
+  Future<void> _deletePost(String postId, {String? sessionId}) async {
     try {
-      await SupabaseConfig.client.from('posts').delete().match({'id': postId});
+      if (sessionId != null) {
+        await SupabaseConfig.client.from('sessions').delete().match({'id': sessionId});
+      } else {
+        await SupabaseConfig.client.from('posts').delete().match({'id': postId});
+      }
       _fetchFeed();
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Post deleted')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Post/Session deleted')));
     } catch (e) {
       debugPrint(e.toString());
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
@@ -266,6 +271,12 @@ class _FeedScreenState extends State<FeedScreen> {
           title: const Text('Community Feed', style: TextStyle(fontWeight: FontWeight.bold)),
           backgroundColor: Colors.transparent,
           elevation: 0,
+          flexibleSpace: ClipRect(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+              child: Container(color: isDark ? Colors.black26 : Colors.white24),
+            ),
+          ),
         ),
         floatingActionButton: Padding(
           padding: const EdgeInsets.only(bottom: 90.0),
@@ -288,6 +299,12 @@ class _FeedScreenState extends State<FeedScreen> {
         title: const Text('Community Feed', style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        flexibleSpace: ClipRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+            child: Container(color: isDark ? Colors.black26 : Colors.white24),
+          ),
+        ),
       ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 90.0),
@@ -355,7 +372,7 @@ class _FeedScreenState extends State<FeedScreen> {
                                           TextButton(
                                             onPressed: () {
                                               Navigator.pop(context);
-                                              _deletePost(post['id']);
+                                              _deletePost(post['id'], sessionId: post['session_id']);
                                             },
                                             child: const Text('Delete', style: TextStyle(color: Colors.red)),
                                           ),
@@ -409,8 +426,6 @@ class _FeedScreenState extends State<FeedScreen> {
                           if (session != null) ...[
                             Text('Workout Time: ${_formatDuration(session['duration_seconds'])}', style: const TextStyle(fontWeight: FontWeight.bold)),
                             const SizedBox(height: 8),
-                            if (session['skills_worked'] != null && session['skills_worked'].isNotEmpty)
-                              Text('Skills: ${session['skills_worked']}'),
                             const Divider(height: 30),
                           ],
                           

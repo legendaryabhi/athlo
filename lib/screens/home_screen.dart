@@ -132,10 +132,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   const Icon(Icons.show_chart, size: 32),
                   Row(
                     children: [
-                      GlassCard(
-                        padding: const EdgeInsets.all(8),
-                        borderRadius: 12,
-                        child: Icon(Icons.bar_chart, size: 20),
+                      GestureDetector(
+                        onTap: () => context.push('/about'),
+                        child: const GlassCard(
+                          padding: EdgeInsets.all(8),
+                          borderRadius: 12,
+                          child: Icon(Icons.info_outline, size: 20),
+                        ),
                       ),
                       const SizedBox(width: 12),
                       GlassCard(
@@ -165,13 +168,7 @@ class _HomeScreenState extends State<HomeScreen> {
               
               const SizedBox(height: 32),
               
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text("Today's stats", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  Text("View more", style: TextStyle(fontSize: 14, color: Colors.grey)),
-                ],
-              ),
+              const Text("Today's stats", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
               
               Row(

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../supabase_client.dart';
 import 'package:provider/provider.dart';
 import '../theme/theme_provider.dart';
@@ -19,6 +20,7 @@ class _SessionScreenState extends State<SessionScreen> with SingleTickerProvider
   bool isActive = false;
   int secondsElapsed = 0;
   Timer? timer;
+  DateTime? _sessionStartTime;
   
   // Modal state
   final _skillsController = TextEditingController();
@@ -34,6 +36,38 @@ class _SessionScreenState extends State<SessionScreen> with SingleTickerProvider
     super.initState();
     _animController = AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
     _scaleAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(_animController);
+    _loadSessionState();
+  }
+
+  Future<void> _loadSessionState() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isSessionActive = prefs.getBool('is_session_active') ?? false;
+    if (isSessionActive) {
+      final startTimeStr = prefs.getString('session_start_time');
+      if (startTimeStr != null) {
+        _sessionStartTime = DateTime.parse(startTimeStr);
+        final now = DateTime.now();
+        setState(() {
+          isActive = true;
+          secondsElapsed = now.difference(_sessionStartTime!).inSeconds;
+        });
+        _animController.forward();
+        _startTimer();
+      }
+    }
+  }
+
+  void _startTimer() {
+    timer?.cancel();
+    timer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (_sessionStartTime != null) {
+        setState(() {
+          secondsElapsed = DateTime.now().difference(_sessionStartTime!).inSeconds;
+        });
+      } else {
+        setState(() => secondsElapsed++);
+      }
+    });
   }
 
   @override
@@ -44,26 +78,31 @@ class _SessionScreenState extends State<SessionScreen> with SingleTickerProvider
     super.dispose();
   }
 
-  void _toggleSession() {
+  Future<void> _toggleSession() async {
+    final prefs = await SharedPreferences.getInstance();
     if (isActive) {
       // Stop session
       setState(() => isActive = false);
       timer?.cancel();
       _animController.reverse();
+      await prefs.remove('session_start_time');
+      await prefs.setBool('is_session_active', false);
       _showShareModal();
     } else {
       // Start session
+      final now = DateTime.now();
       setState(() {
         isActive = true;
+        _sessionStartTime = now;
         secondsElapsed = 0;
         _skillsController.clear();
         _photo = null;
         _isPrivate = false;
       });
+      await prefs.setString('session_start_time', now.toIso8601String());
+      await prefs.setBool('is_session_active', true);
       _animController.forward();
-      timer = Timer.periodic(const Duration(seconds: 1), (t) {
-        setState(() => secondsElapsed++);
-      });
+      _startTimer();
     }
   }
 
@@ -103,7 +142,7 @@ class _SessionScreenState extends State<SessionScreen> with SingleTickerProvider
       }
 
       final now = DateTime.now();
-      final startTime = now.subtract(Duration(seconds: secondsElapsed));
+      final startTime = _sessionStartTime ?? now.subtract(Duration(seconds: secondsElapsed));
 
       final sessionRes = await SupabaseConfig.client.from('sessions').insert({
         'user_id': user.id,

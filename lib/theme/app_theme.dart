@@ -24,6 +24,12 @@ class AppTheme {
       brightness: Brightness.light,
       primaryColor: accentColor,
       scaffoldBackgroundColor: Colors.transparent, // Background handled by container
+      cardColor: Colors.white,
+      dialogBackgroundColor: Colors.white,
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+      ),
       textTheme: GoogleFonts.poppinsTextTheme().apply(
         bodyColor: lightText,
         displayColor: lightText,
@@ -32,7 +38,7 @@ class AppTheme {
       colorScheme: const ColorScheme.light(
         primary: accentColor,
         secondary: accentColor,
-        surface: lightGlassBg,
+        surface: Colors.white,
       ),
       useMaterial3: true,
     );
@@ -43,6 +49,12 @@ class AppTheme {
       brightness: Brightness.dark,
       primaryColor: accentColor,
       scaffoldBackgroundColor: Colors.transparent,
+      cardColor: const Color(0xFF243431),
+      dialogBackgroundColor: const Color(0xFF243431),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: Color(0xFF243431),
+        surfaceTintColor: Colors.transparent,
+      ),
       textTheme: GoogleFonts.poppinsTextTheme().apply(
         bodyColor: darkText,
         displayColor: darkText,
@@ -51,7 +63,7 @@ class AppTheme {
       colorScheme: const ColorScheme.dark(
         primary: accentColor,
         secondary: accentColor,
-        surface: darkGlassBg,
+        surface: Color(0xFF243431),
       ),
       useMaterial3: true,
     );

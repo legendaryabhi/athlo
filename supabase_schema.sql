@@ -69,6 +69,9 @@ ON public.sessions FOR SELECT USING (true);
 CREATE POLICY "Users can insert their own sessions." 
 ON public.sessions FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+CREATE POLICY "Users can delete their own sessions." 
+ON public.sessions FOR DELETE USING (auth.uid() = user_id);
+
 -- Add age column to profiles
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS age integer;
 
@@ -174,5 +177,21 @@ BEGIN
         END IF;
     END LOOP;
 END $$;
+
+-- 8. Feedback Table
+CREATE TABLE IF NOT EXISTS public.feedback (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references public.profiles(id) on delete set null,
+  message text not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+ALTER TABLE public.feedback ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can insert their own feedback." 
+ON public.feedback FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Feedback is viewable by admins only (or disable for now)." 
+ON public.feedback FOR SELECT USING (false);
 
 -- till here executed in supabase add new execution code after here not in between

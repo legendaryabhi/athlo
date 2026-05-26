@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -111,11 +112,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (mounted) context.go('/login');
   }
 
-  Future<void> _deletePost(String postId) async {
+  Future<void> _deletePost(String postId, {String? sessionId}) async {
     try {
-      await SupabaseConfig.client.from('posts').delete().match({'id': postId});
+      if (sessionId != null) {
+        await SupabaseConfig.client.from('sessions').delete().match({'id': sessionId});
+      } else {
+        await SupabaseConfig.client.from('posts').delete().match({'id': postId});
+      }
       _fetchProfileAndSessions();
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Post deleted')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Deleted successfully')));
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+    }
+  }
+
+  Future<void> _deleteSession(String sessionId) async {
+    try {
+      await SupabaseConfig.client.from('sessions').delete().match({'id': sessionId});
+      _fetchProfileAndSessions();
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Session deleted')));
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
     }
@@ -218,6 +233,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: const Text('Profile', style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        flexibleSpace: ClipRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+            child: Container(color: isDark ? Colors.black26 : Colors.white24),
+          ),
+        ),
         actions: [
           IconButton(
             icon: Icon(_isEditing ? Icons.close : Icons.edit_outlined),
@@ -471,7 +492,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(session['created_at'].toString().substring(0, 10), style: const TextStyle(fontWeight: FontWeight.bold)),
-                  if (isPrivate) const Icon(Icons.lock_outline, size: 16, color: Colors.grey)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (isPrivate) const Icon(Icons.lock_outline, size: 16, color: Colors.grey),
+                      PopupMenuButton<String>(
+                        icon: const Icon(Icons.more_vert),
+                        onSelected: (value) {
+                          if (value == 'delete') {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                backgroundColor: Theme.of(context).cardColor,
+                                title: const Text('Delete Session'),
+                                content: const Text('Are you sure you want to delete this session?'),
+                                actions: [
+                                  TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                      _deleteSession(session['id']);
+                                    },
+                                    child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                Icon(Icons.delete, size: 20, color: Colors.red),
+                                SizedBox(width: 8),
+                                Text('Delete', style: TextStyle(color: Colors.red)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  )
                 ],
               ),
             ),
@@ -580,7 +643,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   TextButton(
                                     onPressed: () {
                                       Navigator.pop(context);
-                                      _deletePost(post['id']);
+                                      _deletePost(post['id'], sessionId: post['session_id']);
                                     },
                                     child: const Text('Delete', style: TextStyle(color: Colors.red)),
                                   ),

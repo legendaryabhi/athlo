@@ -9,6 +9,7 @@ import 'screens/home_screen.dart';
 import 'screens/feed_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/session_screen.dart';
+import 'screens/about_screen.dart';
 import 'theme/theme_provider.dart';
 import 'theme/app_theme.dart';
 
@@ -85,6 +86,10 @@ final _router = GoRouter(
     GoRoute(
       path: '/session',
       builder: (context, state) => const SessionScreen(),
+    ),
+    GoRoute(
+      path: '/about',
+      builder: (context, state) => const AboutScreen(),
     ),
   ],
 );
